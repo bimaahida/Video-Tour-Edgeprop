@@ -1,19 +1,18 @@
--- Create enum type for video platforms
-CREATE TYPE video_platform AS ENUM ('reels', 'tiktok', 'short');
-
--- Create video_tours table
 CREATE TABLE video_tours (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  listing_id TEXT NOT NULL,
-  user_id TEXT NOT NULL,
-  name TEXT NOT NULL CHECK (char_length(name) > 0 AND char_length(name) <= 100),
-  link_embed TEXT NOT NULL,
-  thumbnail_url TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-  platform video_platform NOT NULL,
-  
-  -- Add search index on name
-  CONSTRAINT proper_name CHECK (char_length(name) > 0)
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id TEXT NOT NULL,
+    listing_id TEXT NOT NULL,
+    filename VARCHAR(255) NOT NULL,
+    storage_path VARCHAR(255) NOT NULL,
+    video_url TEXT NOT NULL,
+    gif_url TEXT NOT NULL,
+    content_type VARCHAR(100) NOT NULL,
+    file_size BIGINT NOT NULL,
+    title VARCHAR(255) DEFAULT '',
+    instagram VARCHAR(255) DEFAULT '',
+    tiktok VARCHAR(255) DEFAULT '',
+    youtube VARCHAR(255) DEFAULT '',
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Enable Row Level Security on video_tours
