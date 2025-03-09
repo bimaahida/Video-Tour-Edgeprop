@@ -9,8 +9,8 @@ router.use(authenticate);
 
 // Video tour routes
 router.post('/', videoTourController.createVideoTour);
-router.get('/', videoTourController.getUserVideoTours);
-router.get('/:id', videoTourController.getVideoTourById);
+router.get('/:listingID', videoTourController.getUserVideoTours);
+router.get('/detail/:id', videoTourController.getVideoTourById);
 router.delete('/:id', videoTourController.deleteVideoTour);
 
 export default router;

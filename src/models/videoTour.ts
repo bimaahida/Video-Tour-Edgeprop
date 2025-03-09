@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 // Input validation schema for creating a video tour
 export const VideoTourSchema = z.object({
+  listing_id: z.string().min(1, 'Lsting_id is required'),
   name: z.string().min(1, 'Video name is required').max(100, 'Video name cannot exceed 100 characters'),
   link_embed: z.string().url('Valid URL is required'),
   platform: z.enum(['reels', 'tiktok', 'short'], {
@@ -14,6 +15,7 @@ export type VideoTourInput = z.infer<typeof VideoTourSchema>;
 // Response type with all fields
 export interface VideoTourResponse {
   id: string;
+  listing_id: string;
   user_id: string;
   name: string;
   link_embed: string;

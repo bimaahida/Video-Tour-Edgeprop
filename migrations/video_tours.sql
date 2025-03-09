@@ -4,7 +4,8 @@ CREATE TYPE video_platform AS ENUM ('reels', 'tiktok', 'short');
 -- Create video_tours table
 CREATE TABLE video_tours (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID NOT NULL,
+  listing_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
   name TEXT NOT NULL CHECK (char_length(name) > 0 AND char_length(name) <= 100),
   link_embed TEXT NOT NULL,
   thumbnail_url TEXT,

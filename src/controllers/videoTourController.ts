@@ -43,6 +43,10 @@ export async function getUserVideoTours(req: Request, res: Response) {
     if (!userId) {
       return res.status(401).json({ error: 'Authentication required' });
     }
+    const { listingID } = req.params;
+    if (!listingID) {
+      return res.status(401).json({ error: 'Listing ID is required' });
+    }
 
     // Extract pagination parameters from query string
     const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
@@ -54,7 +58,7 @@ export async function getUserVideoTours(req: Request, res: Response) {
     }
 
     // Get user's video tours
-    const videoTours = await videoTourService.getUserVideoTours(userId, page, pageSize);
+    const videoTours = await videoTourService.getUserVideoTours(listingID, userId, page, pageSize);
 
     return res.status(200).json(videoTours);
   } catch (error) {

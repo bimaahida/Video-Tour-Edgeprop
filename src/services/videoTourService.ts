@@ -52,6 +52,7 @@ class VideoTourService {
       link_embed: videoData.link_embed,
       created_at: new Date().toISOString(),
       platform: videoData.platform,
+      listing_id: videoData.listing_id,
     };
 
     const { data, error } = await this.adminDb
@@ -90,7 +91,7 @@ class VideoTourService {
    * @param userId - The user ID
    * @returns Array of video tours
    */
-  async getUserVideoTours(userId: string, page: number = 1, pageSize: number = 10): Promise<VideoTourResponses> {
+  async getUserVideoTours(listingID: string, userId: string, page: number = 1, pageSize: number = 10): Promise<VideoTourResponses> {
     // Ensure valid pagination parameters
     const validPage = Math.max(1, page);
     const validPageSize = Math.min(100, Math.max(1, pageSize)); // Limit max page size to 100
@@ -103,7 +104,8 @@ class VideoTourService {
     const { count, error: countError } = await this.adminDb
       .from('video_tours')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .eq('listing_id', listingID);
 
     if (countError) {
       throw new Error(`Failed to get video tours count: ${countError.message}`);
@@ -125,6 +127,7 @@ class VideoTourService {
       .from('video_tours')
       .select('*')
       .eq('user_id', userId)
+      .eq('listing_id', listingID)
       .order('created_at', { ascending: false })
       .range(adjustedFrom, adjustedTo);
 
