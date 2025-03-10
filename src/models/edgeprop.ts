@@ -76,3 +76,16 @@ export interface EdgePropPoints {
     costumer_id: string;
     permissions: Record<string, boolean>;
 }
+
+export interface EdgePropDeductPoint {
+    status: boolean,
+    result: {
+        transaction_id: string,
+        account_id: string,
+        transaction_id_number: string,
+        new_point: number,
+        amount: number
+    },
+    reason: number,
+    fcm: string
+}

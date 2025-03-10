@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { VideoTourUpload } from '../models/videoTour';
 import { videoTourService } from '../services/videoTourService';
 import { AppsConfig } from '../config/apps-config';
+import { edgepropService } from '../services/edgepropService';
 
 // export async function createVideoTour(req: Request, res: Response) {
 //   try {
@@ -154,7 +155,10 @@ export async function uploadVideo(req: Request, res: Response) {
       }
 
       // Process points deduction since we're exceeding the limit
-      // await deductUserPoints(userId, this.DEFAULT_COST_POINTS);
+      const deductPoint = await edgepropService.deductPoint(userId, validationResult.data.body.listing_id);
+      if (!deductPoint.status) {
+        throw new Error('There was an error in the deduct point.');
+      }
     }
     
     // Upload video and generate GIF

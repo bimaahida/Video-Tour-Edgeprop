@@ -1,6 +1,6 @@
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { EdgePropPoints, EdgePropUserInfo } from '../models/edgeprop';
+import { EdgePropDeductPoint, EdgePropPoints, EdgePropUserInfo } from '../models/edgeprop';
 
 /**
  * EdgeProp API Service
@@ -12,6 +12,7 @@ class EdgePropService {
 
     private drupalInfoUrl: string;
     private pointsApiUrl: string;
+    private deductPointApiUrl: string;
 
     constructor() {
         dotenv.config();
@@ -23,6 +24,7 @@ class EdgePropService {
         }
         this.drupalInfoUrl = `${this.drupalURL!}/index.php?option=com_analytica&task=getDrupalInfo`;
         this.pointsApiUrl = `${this.edgepropPointURL}/api/getPoint`;
+        this.deductPointApiUrl = `${this.edgepropPointURL}/api/deductPoint`;
     }
     async getUserInfo(sessionId: string): Promise<EdgePropUserInfo> {
         try {
@@ -79,6 +81,42 @@ class EdgePropService {
         }
     }
 
+    async deductPoint(agentId: string, listingId: string): Promise<EdgePropDeductPoint> {
+        try {
+            const response = await axios.post(this.deductPointApiUrl, 
+                {
+                    apiKey: "devuser",
+                    agentId: agentId,
+                    type: "DEDUCT_VIDEO_TOUR",
+                    referenceId: "1",
+                    listingId: listingId,
+                    userId: agentId,
+                    note: ""
+                }, 
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+
+                    timeout: 10000 // 10s timeout
+                }
+            );
+
+            if (response.status !== 200) {
+                throw new Error(`EdgeProp API returned status code: ${response.status}`);
+            }
+
+            return response.data;
+        } catch (error) {
+            if (axios.isAxiosError(error)) {
+                const statusCode = error.response?.status || 500;
+                const errorMessage = error.response?.data?.message || error.message;
+                throw new Error(`Failed to fetch points data: ${errorMessage} (${statusCode})`);
+            }
+
+            throw new Error(`Failed to fetch points data: ${(error as Error).message}`);
+        }
+    }
 }
 
 // Export a singleton instance
