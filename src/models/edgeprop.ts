@@ -65,29 +65,14 @@ export interface EdgePropUserSubscription {
     internal: boolean;
 }
 
-export interface EdgePropTransaction {
-    transaction_id: string;
-    amount: number;
-    balance_before: number;
-    balance_after: number;
-    reference_id: string;
-    type: string;
-    note: string; // You can parse the note JSON string if needed
-    date_created: string;
-    trx_status: string;
-    reports: {
-        status: boolean;
-        message: string;
-        report_status: string;
-    };
-}
-
 export interface EdgePropPoints {
-    status: boolean;
+    point: number;
+    status: string;
+    last_activity_at: string;
+    first_activity_at: string;
     start_date: string;
     expiry_date: string;
-    user_status: string;
-    total_rows: number;
-    total_amount: number;
-    transactions: EdgePropTransaction[];
+    account_id: string;
+    costumer_id: string;
+    permissions: Record<string, boolean>;
 }

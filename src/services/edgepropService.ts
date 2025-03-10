@@ -22,7 +22,7 @@ class EdgePropService {
             console.warn('EDGEPROP_URL or EDGEPROP_POINT_URL not set.');
         }
         this.drupalInfoUrl = `${this.drupalURL!}/index.php?option=com_analytica&task=getDrupalInfo`;
-        this.pointsApiUrl = `${this.edgepropPointURL}/api/getTransactions`;
+        this.pointsApiUrl = `${this.edgepropPointURL}/api/getPoint`;
     }
     async getUserInfo(sessionId: string): Promise<EdgePropUserInfo> {
         try {
@@ -54,14 +54,11 @@ class EdgePropService {
         try {
             const response = await axios.get(this.pointsApiUrl, {
                 params: {
-                    limit: 1,
-                    offset: 0,
+                    apiKey: 'apiuser',
                     agentId,
-                    sort: 'posted_desc'
                 },
                 headers: {
                     'Accept': 'application/json',
-                    // 'X-API-Key': this.apiKey
                 },
                 timeout: 10000 // 10s timeout
             });
@@ -70,7 +67,7 @@ class EdgePropService {
                 throw new Error(`EdgeProp API returned status code: ${response.status}`);
             }
 
-            return response.data;
+            return response.data?.result;
         } catch (error) {
             if (axios.isAxiosError(error)) {
                 const statusCode = error.response?.status || 500;

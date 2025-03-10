@@ -138,7 +138,7 @@ export async function uploadVideo(req: Request, res: Response) {
     }
 
     // Get user point
-    const userPoints = req.edgepropPoint?.total_amount;
+    const userPoints = req.edgepropPoint?.point;
     if (!userPoints) {
       return res.status(401).json({ error: 'Authentication required' });
     }
