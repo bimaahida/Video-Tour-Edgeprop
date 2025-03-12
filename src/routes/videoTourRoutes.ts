@@ -6,16 +6,17 @@ import { handleMulterError, uploadMiddleware } from '../middleware/upload';
 const router = express.Router();
 
 // Apply authentication middleware to all routes
-router.use(authenticate);
+// router.use(authenticate);
 
 // Video tour routes
 // router.post('/', videoTourController.createVideoTour);
 router.get('/:listingID', videoTourController.getUserVideoTours);
-router.get('/detail/:id', videoTourController.getVideoTourById);
-router.delete('/:id', videoTourController.deleteVideoTour);
+router.get('/detail/:id', authenticate, videoTourController.getVideoTourById);
+router.delete('/:id', authenticate, videoTourController.deleteVideoTour);
 
 router.post(
   '/upload',
+  authenticate,
   uploadMiddleware.single('video'), // 'video' is the field name in the form
   handleMulterError,
   videoTourController.uploadVideo
