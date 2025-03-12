@@ -41,10 +41,10 @@ import { edgepropService } from '../services/edgepropService';
 export async function getUserVideoTours(req: Request, res: Response) {
   try {
     // Extract user ID from authenticated request
-    const userId = req.user?.user?.uid;
-    if (!userId) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
+    // const userId = req.user?.user?.uid;
+    // if (!userId) {
+    //   return res.status(401).json({ error: 'Authentication required' });
+    // }
     const { listingID } = req.params;
     if (!listingID) {
       return res.status(401).json({ error: 'Listing ID is required' });
@@ -60,7 +60,7 @@ export async function getUserVideoTours(req: Request, res: Response) {
     }
 
     // Get user's video tours
-    const videoTours = await videoTourService.getUserVideoTours(listingID, userId, page, pageSize);
+    const videoTours = await videoTourService.getUserVideoTours(listingID, page, pageSize);
 
     return res.status(200).json(videoTours);
   } catch (error) {

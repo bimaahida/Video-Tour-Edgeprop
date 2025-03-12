@@ -94,7 +94,7 @@ class VideoTourService {
    * @param userId - The user ID
    * @returns Array of video tours
    */
-  async getUserVideoTours(listingID: string, userId: string, page: number = 1, pageSize: number = 10): Promise<VideoTourResponses> {
+  async getUserVideoTours(listingID: string, page: number = 1, pageSize: number = 10): Promise<VideoTourResponses> {
     // Ensure valid pagination parameters
     const validPage = Math.max(1, page);
     const validPageSize = Math.min(100, Math.max(1, pageSize)); // Limit max page size to 100
@@ -107,7 +107,7 @@ class VideoTourService {
     const { count, error: countError } = await this.adminDb
       .from('video_tours')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId)
+      // .eq('user_id', userId)
       .eq('listing_id', listingID);
 
     if (countError) {
@@ -129,7 +129,7 @@ class VideoTourService {
     const { data, error } = await this.adminDb
       .from('video_tours')
       .select('*')
-      .eq('user_id', userId)
+      // .eq('user_id', userId)
       .eq('listing_id', listingID)
       .order('uploaded_at', { ascending: false })
       .range(adjustedFrom, adjustedTo);
