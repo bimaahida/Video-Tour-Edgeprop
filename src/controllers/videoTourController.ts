@@ -150,9 +150,9 @@ export async function uploadVideo(req: Request, res: Response) {
     // 2. Check if user has enough points and process point deduction only if video count exceeds the limit
     if (videoCount.count >= AppsConfig.maxVideoPerUser) {
       // Check if user has enough points
-      if (userPoints < AppsConfig.defaultCostPoint) {
-        throw new Error('Insufficient points to create a video tour.');
-      }
+      // if (userPoints < AppsConfig.defaultCostPoint) {
+      //   throw new Error('Insufficient points to create a video tour.');
+      // }
 
       // Process points deduction since we're exceeding the limit
       const deductPoint = await edgepropService.deductPoint(userId, validationResult.data.body.listing_id);
