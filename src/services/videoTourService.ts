@@ -7,7 +7,8 @@ import { SupabaseConfig } from '../config/supabase-config';
 import { AppsConfig } from '../config/apps-config';
 import { cleanupUploadedFile } from '../middleware/upload';
 import { VideoCountResponse, VideoTourResponses, VideoUploadResult, VideoTourUploadInput } from '../models/videoTour';
-import { generateGifPreview } from '../utils/gifGenerator';
+import { generatePreview } from '../utils/previewGenerator';
+import { generateThumbnail } from '../utils/thumbnailGenerator';
 
 /**
  * Service class for handling video tour operations
@@ -181,15 +182,30 @@ class VideoTourService {
     const videoTour = await this.getVideoTourById(id, userId);
 
     // Delete the gif_url from storage
-    if (videoTour.gif_url) {
-      const path = videoTour.gif_url.split('/').pop();
+    if (videoTour.preview) {
+      const path = videoTour.preview.split('/').pop();
       if (path) {
         const { error: storageError } = await this.adminDb.storage
-          .from(AppsConfig.gifBucket)
+          .from(AppsConfig.previewBucket)
           .remove([path]);
 
         if (storageError) {
-          console.error(`Failed to delete gif_url: ${storageError.message}`);
+          console.error(`Failed to delete preview: ${storageError.message}`);
+          // Continue with deletion even if gif_url deletion fails
+        }
+      }
+    }
+
+    // Delete the gif_url from storage
+    if (videoTour.thumbnail) {
+      const path = videoTour.preview.split('/').pop();
+      if (path) {
+        const { error: storageError } = await this.adminDb.storage
+          .from(AppsConfig.thumbnailBucket)
+          .remove([path]);
+
+        if (storageError) {
+          console.error(`Failed to delete thumbnail: ${storageError.message}`);
           // Continue with deletion even if gif_url deletion fails
         }
       }
@@ -234,8 +250,11 @@ class VideoTourService {
       const fileStats = fs.statSync(videoData.file.path);
       const fileSize = fileStats.size;
 
-      // Generate GIF preview
-      const { gifUrl, gifPath } = await generateGifPreview(this.adminDb, AppsConfig.gifBucket, videoData.file.path);
+      // Generate preview
+      const { url: previewURL, path: previewPath } = await generatePreview(this.adminDb, AppsConfig.previewBucket, videoData.file.path);
+
+      // Generate thumbnail
+      const { url: thumbnailURL, path: thumbnailPath } = await generateThumbnail(this.adminDb, AppsConfig.thumbnailBucket, videoData.file.path)
 
       // Upload video to Supabase
       const { data: uploadData, error: uploadError } = await this.adminDb.storage
@@ -262,7 +281,8 @@ class VideoTourService {
         filename: videoData.file.originalname,
         storage_path: storageFilename,
         video_url: publicUrlData.publicUrl,
-        gif_url: gifUrl,
+        preview: previewURL,
+        thumbnail: thumbnailURL,
         content_type: videoData.file.mimetype,
         file_size: fileSize,
         listing_id: videoData.body.listing_id,
@@ -285,8 +305,6 @@ class VideoTourService {
 
       // Clean up temporary files
       cleanupUploadedFile(videoData.file.path);
-      cleanupUploadedFile(gifPath);
-
       return videoMetadata;
     } catch (error) {
       // Ensure cleanup happens even if there's an error

@@ -74,7 +74,8 @@ export interface VideoUploadResult {
   filename: string;
   storage_path: string;
   video_url: string;
-  gif_url: string;
+  preview: string;
+  thumbnail: string;
   content_type: string;
   file_size: number;
   listing_id: string,
