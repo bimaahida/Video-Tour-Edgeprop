@@ -21,43 +21,49 @@ export async function generatePreview(
   dbClient: SupabaseClient,
   bucket: string,
   videoPath: string,
-  duration: number = 10
+  duration: number = 5
 ): Promise<PreviewGenerationResult> {
   return new Promise((resolve, reject) => {
     try {
       const outputDir = path.dirname(videoPath);
       const previewFilename = `preview-${uuidv4()}.gif`;
       const previewPath = path.join(outputDir, previewFilename);
-      
+
       // Get video information to determine start time
       ffmpeg.ffprobe(videoPath, (err, metadata) => {
         if (err) {
           return reject(new Error(`Failed to probe video: ${err.message}`));
         }
-        
+
         const videoStream = metadata.streams.find(s => s.codec_type === 'video');
         if (!videoStream) {
           return reject(new Error('No video stream found'));
         }
-        
+
         // Get video duration in seconds
-        const videoDuration = metadata?.format?.duration ? metadata.format.duration: 0;
+        const videoDuration = metadata?.format?.duration ? metadata.format.duration : 0;
         if (videoDuration === 0) {
           return reject(new Error('Could not determine video duration'));
         }
-        
+
         // Start at the beginning of the video, but ensure we don't exceed video length
         const startTime = 0;
         const actualDuration = Math.min(duration, videoDuration - startTime);
-        
+
         // Generate the preview
         ffmpeg(videoPath)
           .setStartTime(startTime)
           .setDuration(actualDuration)
           .outputOptions([
-            '-vf', 'fps=10,scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse',
+            '-preset ultrafast',
+            '-threads 1',
+            '-vf', 'fps=8,scale=240:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse',
+            '-an'
           ])
           .output(previewPath)
+          .on('start', (cmd) => {
+            console.log(`Started generate preview with command: ${cmd}`);
+          })
           .on('end', async () => {
             try {
               // Upload preview to Supabase
@@ -67,17 +73,17 @@ export async function generatePreview(
                   contentType: 'image/gif',
                   cacheControl: '3600'
                 });
-                
+
               if (uploadError) {
                 cleanupUploadedFile(previewPath);
                 return reject(new Error(`Failed to upload preview: ${uploadError.message}`));
               }
-              
+
               // Get public URL for the uploaded preview
               const { data: publicUrlData } = dbClient.storage
                 .from(bucket)
                 .getPublicUrl(previewFilename);
-              
+
 
               cleanupUploadedFile(previewPath);
               resolve({

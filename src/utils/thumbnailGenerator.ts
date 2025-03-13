@@ -32,7 +32,7 @@ export async function generateThumbnail(
             // Extract a frame from the video for thumbnail
             ffmpeg(videoPath)
                 .on('start', (cmd) => {
-                    console.log(`Started ffmpeg with command: ${cmd}`);
+                    console.log(`Started generate thumbnail with command: ${cmd}`);
                 })
                 .on('end', async () => {
                     try {
@@ -72,13 +72,14 @@ export async function generateThumbnail(
                     console.error('FFmpeg error:', err);
                     reject(new Error(`Failed to generate thumbnail: ${err.message}`));
                 })
-                .screenshots({
-                    count: 1,
-                    folder: outputDir,
-                    filename: path.basename(thumbnailFilename),
-                    size: '320x?', // Width 320px, height auto to maintain aspect ratio
-                    timestamps: ['00:00:02'] // Take screenshot at 5 seconds
-                });
+                .output(thumbnailPath) // Directly specify output path
+                .outputOptions([
+                    '-vf', 'scale=320:-1', // Resize width to 320px, keep aspect ratio
+                    '-vframes 1', // Extract only one frame
+                ])
+                .seekInput('00:00:02') // Take screenshot at 2 seconds
+                .run();
+
         } catch (error) {
             reject(new Error(`Thumbnail generation failed: ${(error as Error).message}`));
         }
