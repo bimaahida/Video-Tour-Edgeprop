@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { VideoTourUpload } from '../models/videoTour';
+import { VideoTourUpdate, VideoTourUpload } from '../models/videoTour';
 import { videoTourService } from '../services/videoTourService';
 import { AppsConfig } from '../config/apps-config';
 import { edgepropService } from '../services/edgepropService';
@@ -171,5 +171,34 @@ export async function uploadVideo(req: Request, res: Response) {
   } catch (error) {
     console.error('Error uploading video:', error);
     return res.status(500).json({ error: `Failed to upload video: ${(error as Error).message}` });
+  }
+}
+
+export async function update(req: Request, res: Response) {
+  try {
+    // Extract user ID from authenticated request
+    const userId = req.user?.user?.uid;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const { id } = req.params;
+
+    // Validate input
+    const validationResult = VideoTourUpdate.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ error: validationResult.error.issues });
+    }
+
+    // Get the specific video tour
+    const videoTour = await videoTourService.update(id, validationResult.data)
+
+    return res.status(200).json(videoTour);
+  } catch (error) {
+    if ((error as Error).message.includes('not found')) {
+      return res.status(404).json({ error: 'Video tour not found' });
+    }
+
+    return res.status(500).json({ error: 'Failed to update video tour' });
   }
 }

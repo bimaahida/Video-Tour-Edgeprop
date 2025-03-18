@@ -6,7 +6,7 @@ import { SupabaseClient, createClient } from '@supabase/supabase-js';
 import { SupabaseConfig } from '../config/supabase-config';
 import { AppsConfig } from '../config/apps-config';
 import { cleanupUploadedFile } from '../middleware/upload';
-import { VideoCountResponse, VideoTourResponses, VideoUploadResult, VideoTourUploadInput } from '../models/videoTour';
+import { VideoCountResponse, VideoTourResponses, VideoUploadResult, VideoTourUploadInput, VideoTourUpdateInput } from '../models/videoTour';
 import { generatePreview } from '../utils/previewGenerator';
 import { generateThumbnail } from '../utils/thumbnailGenerator';
 
@@ -313,7 +313,32 @@ class VideoTourService {
       throw new Error(`Video upload failed: ${(error as Error).message}`);
     }
   }
+
+  async update(id: string, data: VideoTourUpdateInput): Promise<VideoUploadResult> {
+    try {
+      // Perform update in Supabase
+      const { data: updatedData, error } = await this.adminDb
+        .from('video_tours') // Change to your actual table name
+        .update(data)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) {
+        throw new Error(`Supabase error: ${error.message}`);
+      }
+
+      if (!updatedData) {
+        throw new Error(`Error Update`); 
+      }
+
+      return updatedData as VideoUploadResult;
+    } catch (error) {
+      throw new Error(`Update Video: ${(error as Error).message}`);
+    }
+  }
 }
+
 
 // Export a singleton instance
 export const videoTourService = new VideoTourService();

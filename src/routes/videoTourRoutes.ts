@@ -22,5 +22,11 @@ router.post(
   videoTourController.uploadVideo
 );
 
+router.put(
+  '/:id',
+  authenticate,
+  videoTourController.update
+)
+
 
 export default router;

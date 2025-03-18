@@ -1,3 +1,4 @@
+import { body } from 'express-validator';
 import { z } from 'zod';
 
 // Input validation schema for creating a video tour
@@ -36,6 +37,14 @@ export const VideoTourUpload = z.object({
 });
 
 export type VideoTourUploadInput = z.infer<typeof VideoTourUpload>;
+
+export const VideoTourUpdate = z.object({
+  instagram: z.string().optional(),
+  tiktok: z.string().optional(),
+  youtube: z.string().optional(),
+});
+
+export type VideoTourUpdateInput = z.infer<typeof VideoTourUpdate>;
 
 // Response type with all fields
 export interface VideoTourResponse {
